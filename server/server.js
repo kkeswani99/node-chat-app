@@ -10,6 +10,7 @@ const {isRealString}    = require('./utils/validation.js');
 const {Users}           = require('./utils/users.js');
 var io                  = socketIO(server);//what we get back is our web socket server
 const {generateMessage, generateLocationMessage} = require('./utils/message');
+var emoji = require('node-emoji');
 //Configuring your middleware
 app.use(express.static(publicPath));
 
@@ -43,8 +44,12 @@ io.on('connection', (socket) => {
 		var user = users.getUser(socket.id);
 
 		if (user && isRealString(message.text)) {
-			io.to(user.room).emit('newMessage', generateMessage(user.name,message.text));
-		}
+			if(emoji.hasEmoji(message.text))
+			{
+				message.text = emoji.get(message.text);
+			}
+				io.to(user.room).emit('newMessage', generateMessage(user.name,message.text));
+			}
 		
 		callback();
 	});
